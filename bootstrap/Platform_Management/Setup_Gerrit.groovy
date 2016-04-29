@@ -6,7 +6,7 @@ def platformManagementFolder = folder(platformManagementFolderName) { displayNam
 
 // Jobs
 def setupGerritJob = freeStyleJob(platformManagementFolderName + "/Setup_Gerrit")
- 
+
 // Setup setup_gerrit
 setupGerritJob.with{
     wrappers {
@@ -19,7 +19,7 @@ setupGerritJob.with{
     steps {
         shell('''#!/bin/bash -ex
 
-# Fetch All-Projects 
+# Fetch All-Projects
 cd ${WORKSPACE}
 git clone ssh://jenkins@gerrit:29418/All-Projects
 cd ${WORKSPACE}/All-Projects
@@ -53,8 +53,8 @@ fi''')
                 url("${platformToolsGitURL}")
                 credentials("adop-jenkins-master")
             }
-            branch("*/master")
+            branch('${ADOP_PLATFORM_MANAGEMENT_VERSION:-*/master}')
             relativeTargetDir('platform-management')
         }
     }
-} 
+}

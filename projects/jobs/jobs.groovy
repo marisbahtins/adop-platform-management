@@ -278,7 +278,7 @@ def cartridgeFolder = folder(cartridgeFolderName) {
                 url("${platformToolsGitUrl}")
                 credentials("adop-jenkins-master")
             }
-            branch("*/master")
+            branch('${ADOP_PLATFORM_MANAGEMENT_VERSION:-*/master}')
         }
     }
 }

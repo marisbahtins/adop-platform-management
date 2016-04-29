@@ -6,7 +6,7 @@ def workspaceManagementFolder = folder(workspaceManagementFolderName) { displayN
 
 // Jobs
 def generateWorkspaceJob = freeStyleJob(workspaceManagementFolderName + "/Generate_Workspace")
- 
+
 // Setup generateWorkspaceJob
 generateWorkspaceJob.with{
     parameters{
@@ -72,7 +72,7 @@ done''')
                 url("${platformToolsGitURL}")
                 credentials("adop-jenkins-master")
             }
-            branch("*/master")
+            branch('${ADOP_PLATFORM_MANAGEMENT_VERSION:-*/master}')
         }
     }
-} 
+}

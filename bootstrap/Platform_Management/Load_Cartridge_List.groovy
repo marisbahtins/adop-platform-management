@@ -6,7 +6,7 @@ def platformManagementFolder = folder(platformManagementFolderName) { displayNam
 
 // Jobs
 def loadCartridgeJob = freeStyleJob(platformManagementFolderName + "/Load_Cartridge_List")
- 
+
 // Setup setup_cartridge
 loadCartridgeJob.with{
     wrappers {
@@ -66,8 +66,8 @@ done < ${WORKSPACE}/platform-management/cartridges.txt''')
                 url("${platformToolsGitURL}")
                 credentials("adop-jenkins-master")
             }
-            branch("*/master")
+            branch('${ADOP_PLATFORM_MANAGEMENT_VERSION:-*/master}')
             relativeTargetDir('platform-management')
         }
     }
-} 
+}
