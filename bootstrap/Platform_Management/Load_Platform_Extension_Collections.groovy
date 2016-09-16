@@ -8,11 +8,13 @@ def loadPlatformExtensionCollectionJob = workflowJob(platformManagementFolderNam
 
 // Setup Load_Cartridge Collection
 loadPlatformExtensionCollectionJob.with{
+    description("This job loads a collection of platform extensions.")
     parameters{
         stringParam('COLLECTION_URL', '', 'URL to a JSON file defining your platform extension collection.')
         credentialsParam("AWS_CREDENTIALS"){
             type('com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl')
-            description('AWS access key and secret key for your account')
+            defaultValue('adop-default')
+            description('AWS access key and secret key for your account. Note: If using an AWS based platform extension leave at adop-default.')
         }
     }
     properties {
