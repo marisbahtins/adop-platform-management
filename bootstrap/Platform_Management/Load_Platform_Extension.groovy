@@ -216,7 +216,15 @@ for file in $(ls ${WORKSPACE}/service/${PLATFORM_EXTENSION_TYPE}/*.{conf,ext} 2>
       DEPLOY_DIR=/etc/nginx/sites-enabled/
     fi
 
-    docker cp ${file} proxy:${DEPLOY_DIR}${COUNT}-${SERVICE_NAME}.conf
+    CHECK_PROXY_DEPLOY_DIR_EXISTS=$(docker exec -t proxy /bin/sh -c "ls ${DEPLOY_DIR} > /dev/null" ; echo $?)
+
+    if [ "${CHECK_PROXY_DEPLOY_DIR_EXISTS}" != "0" ] ; then
+      echo "ERROR: Unable to deploy proxy configuration to ${DEPLOY_DIR}."
+      echo "ERROR: This platform version does not support this method of proxy configuration deployment."
+      exit 1
+    else
+      docker cp ${file} proxy:${DEPLOY_DIR}${COUNT}-${SERVICE_NAME}.conf
+    fi
 
     COUNT=$((COUNT+1))
     RELOAD_PROXY=true
