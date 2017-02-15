@@ -6,7 +6,15 @@ def workspaceManagementFolder = folder(workspaceManagementFolderName) { displayN
 
 // Jobs
 def generateWorkspaceJob = freeStyleJob(workspaceManagementFolderName + "/Generate_Workspace")
- 
+
+def adopLdapEnabled = '';
+
+try{
+  adopLdapEnabled = "${ADOP_LDAP_ENABLED}".toBoolean();
+}catch(MissingPropertyException ex){
+  adopLdapEnabled = true;
+}
+
 // Setup generateWorkspaceJob
 generateWorkspaceJob.with{
     parameters{
@@ -20,26 +28,52 @@ generateWorkspaceJob.with{
         preBuildCleanup()
         injectPasswords()
         maskPasswords()
-        environmentVariables {
-            env('DC',"${LDAP_ROOTDN}")
-            env('OU_GROUPS','ou=groups')
-            env('OU_PEOPLE','ou=people')
-            env('OUTPUT_FILE','output.ldif')
-        }
-        credentialsBinding {
-            usernamePassword("LDAP_ADMIN_USER", "LDAP_ADMIN_PASSWORD", "adop-ldap-admin")
-        }
+        if(adopLdapEnabled == true)
+        {
+            environmentVariables
+            {
+                env('DC', "${LDAP_ROOTDN}")
+                env('OU_GROUPS','ou=groups')
+                env('OU_PEOPLE','ou=people')
+                env('OUTPUT_FILE','output.ldif')
+            }
+             credentialsBinding
+             {
+                 usernamePassword("LDAP_ADMIN_USER", "LDAP_ADMIN_PASSWORD", "adop-ldap-admin")
+             }
+         }
+        sshAgent("adop-jenkins-master")
     }
     steps {
         shell('''#!/bin/bash
-
 # Validate Variables
 pattern=" |'"
 if [[ "${WORKSPACE_NAME}" =~ ${pattern} ]]; then
     echo "WORKSPACE_NAME contains a space, please replace with an underscore - exiting..."
     exit 1
 fi''')
-        shell('''# LDAP
+        conditionalSteps
+        {
+            condition
+            {
+                shell('''#!/bin/bash
+if [ "${ADOP_ACL_ENABLED}" == "false" ]
+then
+  exit 1
+fi
+exit 0
+                ''')
+            }
+            runner('DontRun')
+            steps {
+                systemGroovyScriptFile('${WORKSPACE}/workspaces/groovy/acl_admin.groovy')
+                systemGroovyScriptFile('${WORKSPACE}/workspaces/groovy/acl_developer.groovy')
+                systemGroovyScriptFile('${WORKSPACE}/workspaces/groovy/acl_viewer.groovy')
+            }
+        }
+        if(adopLdapEnabled == true) {
+          shell('''
+# LDAP
 ${WORKSPACE}/common/ldap/generate_role.sh -r "admin" -n "${WORKSPACE_NAME}" -d "${DC}" -g "${OU_GROUPS}" -p "${OU_PEOPLE}" -u "${ADMIN_USERS}" -f "${OUTPUT_FILE}" -w "${WORKSPACE}"
 ${WORKSPACE}/common/ldap/generate_role.sh -r "developer" -n "${WORKSPACE_NAME}" -d "${DC}" -g "${OU_GROUPS}" -p "${OU_PEOPLE}" -u "${DEVELOPER_USERS}" -f "${OUTPUT_FILE}" -w "${WORKSPACE}"
 ${WORKSPACE}/common/ldap/generate_role.sh -r "viewer" -n "${WORKSPACE_NAME}" -d "${DC}" -g "${OU_GROUPS}" -p "${OU_PEOPLE}" -u "${VIEWER_USERS}" -f "${OUTPUT_FILE}" -w "${WORKSPACE}"
@@ -55,15 +89,14 @@ VIEWER_USERS=$(echo ${VIEWER_USERS} | tr ',' ' ')
 # Gerrit
 for user in $ADMIN_USERS $DEVELOPER_USERS $VIEWER_USERS
 do
-        username=$(echo ${user} | cut -d'@' -f1)
-        ${WORKSPACE}/common/gerrit/create_user.sh -g http://gerrit:8080/gerrit -u "${username}" -p "${username}"
-done''')
-        dsl {
-            external("workspaces/jobs/**/*.groovy")
+    username=$(echo ${user} | cut -d'@' -f1)
+    ${WORKSPACE}/common/gerrit/create_user.sh -g http://gerrit:8080/gerrit -u "${username}" -p "${username}"
+done
+          ''')
         }
-        systemGroovyScriptFile('${WORKSPACE}/workspaces/groovy/acl_admin.groovy')
-        systemGroovyScriptFile('${WORKSPACE}/workspaces/groovy/acl_developer.groovy')
-        systemGroovyScriptFile('${WORKSPACE}/workspaces/groovy/acl_viewer.groovy')
+        dsl {
+          external("workspaces/jobs/**/*.groovy")
+        }
     }
     scm {
         git {
@@ -75,4 +108,4 @@ done''')
             branch("*/master")
         }
     }
-} 
+}
