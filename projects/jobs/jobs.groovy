@@ -196,27 +196,34 @@ fileList.each {
     jenkinsInstace.getItem(projectName,jenkinsInstace).createProjectFromXML(jobName, xmlStream)
 }
 ''')
-        dsl {
-            text('''import pluggable.scm.*;
+   groovy {
+    scriptSource {
+        stringScriptSource {
+            command('''import pluggable.scm.SCMProvider;
+import pluggable.configuration.EnvVarProperty;
 
-// Instantiate your SCM provider where your repos will be created
-SCMProvider scmProvider = SCMProviderHandler.getScmProvider("${SCM_PROVIDER_ID}", binding.variables)
+EnvVarProperty envVarProperty = EnvVarProperty.getInstance();
+envVarProperty.setVariableBindings(System.getenv());
 
-def workspace = "${WORKSPACE}"
-def projectFolderName = "${PROJECT_NAME}"
-def cartridgeFolder = "${CARTRIDGE_FOLDER}"
-def overwriteRepos = "${OVERWRITE_REPOS}"
+String scmProviderId = envVarProperty.getProperty('SCM_PROVIDER_ID')
+
+println envVarProperty.getPropertiesPath();
+
+SCMProvider scmProvider = SCMProviderHandler.getScmProvider(scmProviderId, System.getenv())
+
+def workspace = envVarProperty.getProperty('WORKSPACE')
+def projectFolderName = envVarProperty.getProperty('PROJECT_NAME')
+def cartridgeFolder = envVarProperty.getProperty('CARTRIDGE_FOLDER')
+def overwriteRepos = envVarProperty.getProperty('OVERWRITE_REPOS')
 def scmNamespace = ''' + namespaceValue + '''
-def codeReviewEnabled = "${ENABLE_CODE_REVIEW}"
+def codeReviewEnabled = envVarProperty.getProperty('ENABLE_CODE_REVIEW')
 
 String repoNamespace = null;
 
-// Check if a custom SCM namespace has been provided
 if (scmNamespace != null && !scmNamespace.isEmpty()){
   println("Custom SCM namespace specified...")
   repoNamespace = scmNamespace
 } else {
-  // Check if a folder is specified
   println("Custom SCM namespace not specified, using default project namespace...")
   if (cartridgeFolder == ""){
     println("Folder name not specified...")
@@ -228,9 +235,15 @@ if (scmNamespace != null && !scmNamespace.isEmpty()){
 }
 
 // Create your SCM repositories
-scmProvider.createScmRepos(workspace, repoNamespace, codeReviewEnabled, overwriteRepos)
-            ''')
-            additionalClasspath("job_dsl_additional_classpath/")
+scmProvider.createScmRepos(workspace, repoNamespace, codeReviewEnabled, overwriteRepos)''')
+                }
+            }
+            parameters("")
+            scriptParameters("")
+            properties("")
+            javaOpts("")
+            groovyName("ADOP Groovy")
+            classPath('''${WORKSPACE}/job_dsl_additional_classpath''')
         }
         conditionalSteps {
             condition {
