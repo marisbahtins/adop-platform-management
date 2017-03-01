@@ -28,7 +28,7 @@ generateProjectJob.with{
         stringParam("DEVELOPER_USERS","","The list of users' email addresses that should be setup initially as developers. They will have full access to all non-admin jobs within the project.")
         stringParam("VIEWER_USERS","","The list of users' email addresses that should be setup initially as viewers. They will have read-only access to all non-admin jobs within the project.")
     }
-    label("ldap")
+    label("!windows && !master")
     environmentVariables {
         env('WORKSPACE_NAME',workspaceFolderName)
     }

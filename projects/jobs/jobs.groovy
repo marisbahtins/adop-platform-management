@@ -112,7 +112,7 @@ return cartridge_urls;
         maskPasswords()
         credentialsBinding {
             file('SCM_SSH_KEY', 'adop-jenkins-private')
-        }        
+        }
         copyToSlaveBuildWrapper {
           includes("**/**")
           excludes("")
@@ -122,7 +122,7 @@ return cartridge_urls;
           hudsonHomeRelative(false)
         }
     }
-    label("!master")
+    label("!windows && !master")
     steps {
         shell('''#!/bin/bash -ex
 
@@ -180,7 +180,7 @@ if(credentialId != null){
 
   channel = build.workspace.channel;
   fp = new FilePath(channel, build.workspace.toString() + "@tmp/secretFiles/" + build.getEnvVars()["SCM_KEY"])
-  fp.write("SCM_USERNAME="+credentialInfo[0]+"\\nSCM_PASSWORD="+credentialInfo[1], null);  
+  fp.write("SCM_USERNAME="+credentialInfo[0]+"\\nSCM_PASSWORD="+credentialInfo[1], null);
 
 }
 '''){
