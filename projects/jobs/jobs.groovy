@@ -1,6 +1,3 @@
-// Constants
-def platformToolsGitUrl = "${PLATFORM_MANAGEMENT_GIT_URL}"
-def scmPropertiesPath = "${PLUGGABLE_SCM_PROVIDER_PROPERTIES_PATH}"
 
 // Folders
 def workspaceFolderName = "${WORKSPACE_NAME}"
@@ -110,7 +107,7 @@ return cartridge_urls;
         maskPasswords()
         credentialsBinding {
             file('SCM_SSH_KEY', 'adop-jenkins-private')
-        }        
+        }
         copyToSlaveBuildWrapper {
           includes("**/**")
           excludes("")
@@ -178,7 +175,7 @@ if(credentialId != null){
 
   channel = build.workspace.channel;
   fp = new FilePath(channel, build.workspace.toString() + "@tmp/secretFiles/" + build.getEnvVars()["SCM_KEY"])
-  fp.write("SCM_USERNAME="+credentialInfo[0]+"\\nSCM_PASSWORD="+credentialInfo[1], null);  
+  fp.write("SCM_USERNAME="+credentialInfo[0]+"\\nSCM_PASSWORD="+credentialInfo[1], null);
 
 }
 '''){
@@ -398,14 +395,13 @@ def cartridgeFolder = folder(cartridgeFolderName) {
         git {
             remote {
                 name("origin")
-                url("${platformToolsGitUrl}")
+                url('${ADOP_PLATFORM_MANAGEMENT_GIT_URL:-ssh://jenkins@gerrit:29418/platform-management}')
                 credentials("adop-jenkins-master")
             }
             branch("*/master")
         }
     }
 }
-
 
 // Setup Load_Cartridge Collection
 loadCartridgeCollectionJob.with{

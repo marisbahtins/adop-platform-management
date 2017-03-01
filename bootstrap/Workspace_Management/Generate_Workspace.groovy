@@ -1,12 +1,4 @@
 // Constants
-def platformToolsGitURL = null;
-
-try{
-  platformToolsGitURL = "${PLATFORM_MANAGEMENT_GIT_URL}";
-}catch(MissingPropertyException exception){
-  // backwards compatible - default to gerrit.
-  platformToolsGitURL = "ssh://jenkins@gerrit:29418/platform-management";
-}
 
 def workspaceManagementFolderName= "/Workspace_Management"
 def workspaceManagementFolder = folder(workspaceManagementFolderName) { displayName('Workspace Management') }
@@ -109,7 +101,7 @@ done
         git {
             remote {
                 name("origin")
-                url("${platformToolsGitURL}")
+                url('${ADOP_PLATFORM_MANAGEMENT_GIT_URL:-ssh://jenkins@gerrit:29418/platform-management}')
                 credentials("adop-jenkins-master")
             }
             branch("*/master")
