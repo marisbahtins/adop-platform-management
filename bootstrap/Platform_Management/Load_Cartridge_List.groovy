@@ -1,12 +1,19 @@
 // Constants
-def platformToolsGitURL = "ssh://jenkins@gerrit:29418/platform-management"
+def platformToolsGitURL = null;
+
+try{
+  platformToolsGitURL = "${PLATFORM_MANAGEMENT_GIT_URL}";
+}catch(MissingPropertyException exception){
+  // backwards compatible - default to gerrit.
+  platformToolsGitURL = "ssh://jenkins@gerrit:29418/platform-management";
+}
 
 def platformManagementFolderName= "/Platform_Management"
 def platformManagementFolder = folder(platformManagementFolderName) { displayName('Platform Management') }
 
 // Jobs
 def loadCartridgeJob = freeStyleJob(platformManagementFolderName + "/Load_Cartridge_List")
- 
+
 // Setup setup_cartridge
 loadCartridgeJob.with{
     wrappers {
