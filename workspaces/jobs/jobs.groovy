@@ -66,10 +66,11 @@ fi''')
           condition
           {
               shell('''
+#!/bin/bash
 if [ "${ADOP_ACL_ENABLED}" == "false" ]
-  then
-exit 1
-  fi
+then
+  exit 1
+fi
 exit 0
               ''')
           }
