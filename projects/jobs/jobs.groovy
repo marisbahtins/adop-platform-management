@@ -1,7 +1,5 @@
 // Constants
-def gerritBaseUrl = "ssh://jenkins@gerrit:29418"
-def cartridgeBaseUrl = gerritBaseUrl + "/cartridges"
-def platformToolsGitUrl = gerritBaseUrl + "/platform-management"
+def platformToolsGitUrl = "${PLATFORM_MANAGEMENT_GIT_URL}"
 def scmPropertiesPath = "${PLUGGABLE_SCM_PROVIDER_PROPERTIES_PATH}"
 
 // Folders
