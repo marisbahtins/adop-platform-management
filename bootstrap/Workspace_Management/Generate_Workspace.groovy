@@ -56,8 +56,7 @@ fi''')
         {
             condition
             {
-                shell('''
-#!/bin/bash
+                shell('''#!/bin/bash
 if [ "${ADOP_ACL_ENABLED}" == "false" ]
 then
   exit 1
