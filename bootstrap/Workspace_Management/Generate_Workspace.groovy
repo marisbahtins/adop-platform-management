@@ -1,12 +1,10 @@
 // Constants
-def platformToolsGitURL = "ssh://jenkins@gerrit:29418/platform-management"
-
 def workspaceManagementFolderName= "/Workspace_Management"
 def workspaceManagementFolder = folder(workspaceManagementFolderName) { displayName('Workspace Management') }
 
 // Jobs
 def generateWorkspaceJob = freeStyleJob(workspaceManagementFolderName + "/Generate_Workspace")
- 
+
 // Setup generateWorkspaceJob
 generateWorkspaceJob.with{
     parameters{
@@ -69,10 +67,10 @@ done''')
         git {
             remote {
                 name("origin")
-                url("${platformToolsGitURL}")
+                url('${ADOP_PLATFORM_MANAGEMENT_GIT_URL:-ssh://jenkins@gerrit:29418/platform-management}')
                 credentials("adop-jenkins-master")
             }
             branch("*/master")
         }
     }
-} 
+}

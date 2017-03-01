@@ -1,5 +1,3 @@
-// Constants
-def platformToolsGitURL = "ssh://jenkins@gerrit:29418/platform-management"
 
 // Folders
 def workspaceFolderName = "${WORKSPACE_NAME}"
@@ -83,7 +81,7 @@ source ${WORKSPACE}/projects/gerrit/configure.sh -r permissions-with-review''')
         git {
             remote {
                 name("origin")
-                url("${platformToolsGitURL}")
+                url('${ADOP_PLATFORM_MANAGEMENT_GIT_URL:-ssh://jenkins@gerrit:29418/platform-management}')
                 credentials("adop-jenkins-master")
             }
             branch("*/master")

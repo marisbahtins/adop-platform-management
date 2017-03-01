@@ -1,7 +1,3 @@
-// Constants
-def gerritBaseUrl = "ssh://jenkins@gerrit:29418"
-def cartridgeBaseUrl = gerritBaseUrl + "/cartridges"
-def platformToolsGitUrl = gerritBaseUrl + "/platform-management"
 
 // Folders
 def workspaceFolderName = "${WORKSPACE_NAME}"
@@ -275,14 +271,13 @@ def cartridgeFolder = folder(cartridgeFolderName) {
         git {
             remote {
                 name("origin")
-                url("${platformToolsGitUrl}")
+                url('${ADOP_PLATFORM_MANAGEMENT_GIT_URL:-ssh://jenkins@gerrit:29418/platform-management}')
                 credentials("adop-jenkins-master")
             }
             branch("*/master")
         }
     }
 }
-
 
 // Setup Load_Cartridge Collection
 loadCartridgeCollectionJob.with{
