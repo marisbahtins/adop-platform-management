@@ -61,7 +61,7 @@ fi''')
                 url("${platformToolsGitURL}")
                 credentials("adop-jenkins-master")
             }
-            branch('${ADOP_PLATFORM_MANAGEMENT_VERSION:-*/master}')
+            branch('${ADOP_PLATFORM_MANAGEMENT_VERSION}')
             relativeTargetDir('platform-management')
         }
     }
