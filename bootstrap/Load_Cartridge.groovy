@@ -87,7 +87,7 @@ build job: "${WORKSPACE_NAME}/Project_Management/Generate_Project", parameters: 
 // Load Cartridge
 retry(5)
 {
-    build job: "${WORKSPACE_NAME}/${PROJECT_NAME}/Cartridge_Management/Load_Cartridge", parameters: [[$class: 'StringParameterValue', name: 'CARTRIDGE_FOLDER', value: "${CARTRIDGE_FOLDER}"], [$class: 'StringParameterValue', name: 'FOLDER_DISPLAY_NAME', value: "${FOLDER_DISPLAY_NAME}"], [$class: 'StringParameterValue', name: 'FOLDER_DESCRIPTION', value: "${FOLDER_DESCRIPTION}"], [$class: 'BooleanParameterValue', name: 'ENABLE_CODE_REVIEW', value: "${ENABLE_CODE_REVIEW}".toBoolean()], [$class: 'BooleanParameterValue', name: 'OVERWRITE_REPOS', value: "${OVERWRITE_REPOS}".toBoolean()], [$class: 'StringParameterValue', name: 'CARTRIDGE_CLONE_URL', value: "${CARTRIDGE_CLONE_URL}"], [$class: 'StringParameterValue', name: 'SCM_NAMESPACE', value: "${SCM_NAMESPACE}"]]
+    build job: "${WORKSPACE_NAME}/${PROJECT_NAME}/Cartridge_Management/Load_Cartridge", parameters: [[$class: 'StringParameterValue', name: 'CARTRIDGE_FOLDER', value: "${CARTRIDGE_FOLDER}"], [$class: 'StringParameterValue', name: 'FOLDER_DISPLAY_NAME', value: "${FOLDER_DISPLAY_NAME}"], [$class: 'StringParameterValue', name: 'FOLDER_DESCRIPTION', value: "${FOLDER_DESCRIPTION}"], [$class: 'BooleanParameterValue', name: 'ENABLE_CODE_REVIEW', value: "${ENABLE_CODE_REVIEW}".toBoolean()], [$class: 'BooleanParameterValue', name: 'OVERWRITE_REPOS', value: "${OVERWRITE_REPOS}".toBoolean()], [$class: 'StringParameterValue', name: 'CARTRIDGE_CLONE_URL', value: "${CARTRIDGE_CLONE_URL}"], [$class: 'StringParameterValue', name: 'SCM_NAMESPACE', value: "${SCM_NAMESPACE}"], [$class: 'StringParameterValue', name: 'SCM_PROVIDER', value: "${SCM_PROVIDER}"]]
 }''')
             sandbox()
         }
