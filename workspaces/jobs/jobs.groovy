@@ -122,7 +122,7 @@ exit 0
                 url("${platformToolsGitURL}")
                 credentials("adop-jenkins-master")
             }
-            branch("*/master")
+            branch('${ADOP_PLATFORM_MANAGEMENT_VERSION:-*/master}')
         }
     }
 }
