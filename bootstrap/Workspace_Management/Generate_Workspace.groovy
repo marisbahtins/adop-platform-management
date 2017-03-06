@@ -42,7 +42,6 @@ generateWorkspaceJob.with{
                  usernamePassword("LDAP_ADMIN_USER", "LDAP_ADMIN_PASSWORD", "adop-ldap-admin")
              }
          }
-        sshAgent("adop-jenkins-master")
     }
     steps {
         shell('''#!/bin/bash

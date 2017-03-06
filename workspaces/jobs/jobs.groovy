@@ -48,8 +48,8 @@ generateProjectJob.with{
           {
               usernamePassword("LDAP_ADMIN_USER", "LDAP_ADMIN_PASSWORD", "adop-ldap-admin")
           }
+          sshAgent("adop-jenkins-master")
         }
-        sshAgent("adop-jenkins-master")
     }
     steps
     {
@@ -100,6 +100,11 @@ exit 0
      username=$(echo ${user} | cut -d'@' -f1)
      ${WORKSPACE}/common/gerrit/create_user.sh -g http://gerrit:8080/gerrit -u "${username}" -p "${username}"
  done
+
+ # Gerrit
+ source ${WORKSPACE}/projects/gerrit/configure.sh
+ # Generate second permission repo with enabled code-review
+ source ${WORKSPACE}/projects/gerrit/configure.sh -r permissions-with-review
              ''')
         }
         dsl {
