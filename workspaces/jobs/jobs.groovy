@@ -12,11 +12,18 @@ def projectManagementFolder = folder(projectManagementFolderName) { displayName(
 def generateProjectJob = freeStyleJob(projectManagementFolderName + "/Generate_Project")
 
 def adopLdapEnabled = '';
+def ldapIsModifiable = '';
 
 try{
   adopLdapEnabled = "${ADOP_LDAP_ENABLED}".toBoolean();
 }catch(MissingPropertyException ex){
   adopLdapEnabled = true;
+}
+
+try {
+  ldapIsModifiable = "${LDAP_IS_MODIFIABLE}".toBoolean();
+} catch(MissingPropertyException ex) {
+  ldapIsModifiable = true;
 }
 
 // Setup Generate_Project
@@ -40,7 +47,7 @@ generateProjectJob.with{
         {
           environmentVariables
           {
-              env('DC', "${LDAP_ROOTDN}")
+              env('DC', "${DC}")
               env('OU_GROUPS','ou=groups')
               env('OU_PEOPLE','ou=people')
               env('OUTPUT_FILE','output.ldif')
@@ -81,32 +88,34 @@ exit 0
             }
         }
         if(adopLdapEnabled == true){
+            if ( ldapIsModifiable == true ) {
+              shell('''
+  # LDAP
+  ${WORKSPACE}/common/ldap/generate_role.sh -r "admin" -n "${WORKSPACE_NAME}" -d "${DC}" -g "${OU_GROUPS}" -p "${OU_PEOPLE}" -u "${ADMIN_USERS}" -f "${OUTPUT_FILE}" -w "${WORKSPACE}"
+  ${WORKSPACE}/common/ldap/generate_role.sh -r "developer" -n "${WORKSPACE_NAME}" -d "${DC}" -g "${OU_GROUPS}" -p "${OU_PEOPLE}" -u "${DEVELOPER_USERS}" -f "${OUTPUT_FILE}" -w "${WORKSPACE}"
+  ${WORKSPACE}/common/ldap/generate_role.sh -r "viewer" -n "${WORKSPACE_NAME}" -d "${DC}" -g "${OU_GROUPS}" -p "${OU_PEOPLE}" -u "${VIEWER_USERS}" -f "${OUTPUT_FILE}" -w "${WORKSPACE}"
+
+  set +e
+  ${WORKSPACE}/common/ldap/load_ldif.sh -h ldap -u "${LDAP_ADMIN_USER}" -p "${LDAP_ADMIN_PASSWORD}" -b "${DC}" -f "${OUTPUT_FILE}"
+  set -e
+              ''')
+            }
           shell('''
- # LDAP
- ${WORKSPACE}/common/ldap/generate_role.sh -r "admin" -n "${WORKSPACE_NAME}" -d "${DC}" -g "${OU_GROUPS}" -p "${OU_PEOPLE}" -u "${ADMIN_USERS}" -f "${OUTPUT_FILE}" -w "${WORKSPACE}"
- ${WORKSPACE}/common/ldap/generate_role.sh -r "developer" -n "${WORKSPACE_NAME}" -d "${DC}" -g "${OU_GROUPS}" -p "${OU_PEOPLE}" -u "${DEVELOPER_USERS}" -f "${OUTPUT_FILE}" -w "${WORKSPACE}"
- ${WORKSPACE}/common/ldap/generate_role.sh -r "viewer" -n "${WORKSPACE_NAME}" -d "${DC}" -g "${OU_GROUPS}" -p "${OU_PEOPLE}" -u "${VIEWER_USERS}" -f "${OUTPUT_FILE}" -w "${WORKSPACE}"
+  ADMIN_USERS=$(echo ${ADMIN_USERS} | tr ',' ' ')
+  DEVELOPER_USERS=$(echo ${DEVELOPER_USERS} | tr ',' ' ')
+  VIEWER_USERS=$(echo ${VIEWER_USERS} | tr ',' ' ')
+  # Gerrit
+  for user in $ADMIN_USERS $DEVELOPER_USERS $VIEWER_USERS
+  do
+      username=$(echo ${user} | cut -d'@' -f1)
+      ${WORKSPACE}/common/gerrit/create_user.sh -g http://gerrit:8080/gerrit -u "${username}" -p "${username}"
+  done
 
- set +e
- ${WORKSPACE}/common/ldap/load_ldif.sh -h ldap -u "${LDAP_ADMIN_USER}" -p "${LDAP_ADMIN_PASSWORD}" -b "${DC}" -f "${OUTPUT_FILE}"
- set -e
-
- ADMIN_USERS=$(echo ${ADMIN_USERS} | tr ',' ' ')
- DEVELOPER_USERS=$(echo ${DEVELOPER_USERS} | tr ',' ' ')
- VIEWER_USERS=$(echo ${VIEWER_USERS} | tr ',' ' ')
-
- # Gerrit
- for user in $ADMIN_USERS $DEVELOPER_USERS $VIEWER_USERS
- do
-     username=$(echo ${user} | cut -d'@' -f1)
-     ${WORKSPACE}/common/gerrit/create_user.sh -g http://gerrit:8080/gerrit -u "${username}" -p "${username}"
- done
-
- # Gerrit
- source ${WORKSPACE}/projects/gerrit/configure.sh
- # Generate second permission repo with enabled code-review
- source ${WORKSPACE}/projects/gerrit/configure.sh -r permissions-with-review
-             ''')
+  # Gerrit
+  source ${WORKSPACE}/projects/gerrit/configure.sh
+  # Generate second permission repo with enabled code-review
+  source ${WORKSPACE}/projects/gerrit/configure.sh -r permissions-with-review
+          ''')
         }
         dsl {
           external("projects/jobs/**/*.groovy")
